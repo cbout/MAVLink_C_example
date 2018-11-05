@@ -61,6 +61,8 @@ int main(void)
 				printf("%02x ", (unsigned char)temp);
 			}
 		}
+		
+		sleep(1);
 	}
 
 	close(s2);

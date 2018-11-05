@@ -8,7 +8,7 @@ As part of our studies, in the [Master 1 Computer sciences and engineering of co
 
 We have decided to use the [c_library_v1](https://github.com/mavlink/c_library_v1) (MIT-licenced project) and we do not find many examples of implementation. That is why we are going to summarize all the information we have found. We will also expose our understanding of the MAVLink v1 communication and the C library across some examples in the folder examples.
 
-## MAVLink ##
+## MAVLink
 
 > Micro Air Vehicle Link (MAVLink) is a very lightweight messaging protocol for communicating with drones (and between onboard drone components). 
 
@@ -50,9 +50,10 @@ The heartbeat is one of the most important messages, GCS have to send it each se
 
 For example, for a heartbeat the message will looking to this :
 
-|              MAVLink version              |       Payload length       |               Packet sequence               |             Systeme ID             |               Component ID                |           Message ID            |            Data            | Checksum |
-| :---------------------------------------: | :------------------------: | :-----------------------------------------: | :--------------------------------: | :---------------------------------------: | :-----------------------------: | :------------------------: | -------- |
-| FE<br />Start of a packet of MAVLink v1.0 | 09<br />Len of the payload | 00<br />Mean it's the first message we sent | FF<br />Mean we are Ground Control | 00<br />For GC no need to specify Comp ID | 00<br />Refer to Heartbeat's ID | 00 00 00 00 06 03 C0 04 03 | F5 C0    |
+|          MAVLink version          |   Payload length   |           Packet sequence           |         Systeme ID         |           Component ID            |       Message ID        |            Data            | Checksum |
+| :-------------------------------: | :----------------: | :---------------------------------: | :------------------------: | :-------------------------------: | :---------------------: | :------------------------: | -------- |
+|                FE                 |         09         |                 00                  |             FF             |                00                 |           00            | 00 00 00 00 06 03 C0 04 03 | F5 C0    |
+| Start of a packet of MAVLink v1.0 | Len of the payload | Mean it's the first message we sent | Mean we are Ground Control | For GC no need to specify Comp ID | Refer to Heartbeat's ID |                            |          |
 
 Data :
 
@@ -63,8 +64,16 @@ Data :
 * systeme status: MAV_STATE_ACTIVE(0x04)
 * mavlink_version: 0x03
 
+There is different types of messages, some messages will just send data (like the heartbeat), other will do something on the MAV (like [COMMAND_LONG](https://mavlink.io/en/messages/common.html#COMMAND_LONG), some commands [here](https://mavlink.io/en/messages/common.html#MAV_CMD)) and other will request some information (like [REQUEST_DATA_STREAM](https://mavlink.io/en/messages/common.html#REQUEST_DATA_STREAM)).
+
+## How to use it in C?
+
+You can refer to our folder `./examples/` and its [README](examples/README.md) to see some implementation of MAVLink in C, there is also this [README](./include/README.md) in `./include/` folder to simplify the [c_library_v1](https://github.com/mavlink/c_library_v1) understanding.
+
+## Sources:
 
 
 
+http://ardupilot.org/dev/docs/copter-commands-in-guided-mode.html (for commands messages refer to : )
 
-(for commands messages refer to : [MAVLink_commande_message](http://ardupilot.org/dev/docs/copter-commands-in-guided-mode.html))
+[./examples]: 

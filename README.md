@@ -1,12 +1,12 @@
 # MAVLink_C_example #
 
-This project was released by BERGOIN Raphäel and BOUT Clément, students in the University of Cergy-Pontoise. It contains some examples of our understanding of the MAVLink C library (refer to this [github project ][c_lib] to see the entire MAVLink c library project).
+This project was released by BERGOIN Raphäel and BOUT Clément, students in the University of Cergy-Pontoise. It contains some examples and explanation of our understanding of the MAVLink C library (refer to this [github project ][c_lib] to see the entire MAVLink c library project).
 
 ## Introduction ##
 
-As part of our studies, in the [Master 1 Computer sciences and engineering of complex systems (IISC)](https://depinfo.u-cergy.fr/master/m1-iisc-master-1), we work with the [ETIS](https://www-etis.ensea.fr/) laboratory to release a stable communication between a 3DR Solo and C program which can control it.
+As part of our studies, in the [Master 1 Computer sciences and engineering of complex systems (IISC)][miisc], we work with the [ETIS][etis] laboratory to release a sort of ground station (GS) in C for a 3DR Solo Drone with the aim to implement a neural network able to control the drone by using this GS.
 
-We have decided to use the [c_library_v1][c_lib] (MIT-licenced project) and we do not find many simple examples of implementation and using of this library. That is why we are going to summarize all the information we have found about MAVLink and the C library. We will also expose our understanding of the MAVLink v1 communication and the C library across some examples in the folder examples. We are not so presumptuous to consider that our understanding and using are the best. If you see some misunderstanding or error in our project, it would be nice to tell us the mistakes.
+In order to realize our project we have decided to use the [c_library_v1][c_lib] (MIT-licenced project) and we do not find an easy tutorial to understand MAVLink and the C library. That is why we are going to summarize all the information we have found about MAVLink and the C library. We will also expose our understanding of the MAVLink v1 communication and the C library across some examples in the folder **`examples/`**. We are not so presumptuous to consider that our understanding and using are the best way to use the [c_library_v1][c_lib]. It would be nice to tell us our mistakes or misunderstanding.
 
 ## MAVLink
 
@@ -39,7 +39,7 @@ The MAVLink message is a stream of bytes that has been encoded by a Mission Plan
 
 #### Heartbeat (ID: #0)
 
-The heartbeat is one of the most important messages, GCS have to send it each second to notify he is alive and the connection is available.  
+The heartbeat is one of the most important message, GS have to send it each second to notify it is alive and the connection is available.
 
 | Field Name      | Type     | Values                                                       | Description                |
 | --------------- | -------- | ------------------------------------------------------------ | -------------------------- |
@@ -61,7 +61,7 @@ Data :
 
 * type: MAV_TYPE_GCS (0x06)
 * autopilot: MAV_AUTOPILOT_ARDU_PILOTMEGA(0x03)
-* base mode: MAV_MODE_FLAG_SAFETY_ARMED + MAV_MODE_FLAG_MANUAL_INPUT_ENABLED(0xc0)
+* base mode: MAV_MODE_FLAG_SAFETY_ARMED + MAV_MODE_FLAG_MANUAL_INPUT_ENABLED = (0xc0)
 * custom mode: No custom mode(0x00 00 00 00)
 * systeme status: MAV_STATE_ACTIVE(0x04)
 * mavlink_version: 0x03
@@ -70,14 +70,15 @@ There is different types of messages, some messages will just send data (like th
 
 ## How to use it in C?
 
-You can refer to our folder `./examples/` and its [README](examples/README.md) to see some implementation of MAVLink in C, there is also this [README](./include/README.md) in `./include/` folder to simplify the [c_library_v1][c_lib] understanding.
+You can refer to our folder `examples/` and its [README](examples/README.md) to see some implementation of MAVLink in C, there is also this [README](./include/README.md) in `include/` to simplify the [c_library_v1][c_lib] understanding.
 
 ## Sources:
-
-
 
 http://ardupilot.org/dev/docs/copter-commands-in-guided-mode.html (for commands messages refer to : )
 
 [c_lib]:https://github.com/mavlink/c_library_v1	"C library v1 repository"
-[mavlink_step_by_step]:https://discuss.ardupilot.org/t/mavlink-step-by-step/9629	"The article of Pedro Albuquerque"
+[mavlink_step_by_step]:https://discuss.ardupilot.org/t/mavlink-step-by-step/9629	"The MAVLink step by step by Pedro Albuquerque"
+[etis]:https://www-etis.ensea.fr/	"ETIS laboratory's website"
+[miisc]:https://depinfo.u-cergy.fr/master/m1-iisc-master-1	"Master's website"
+[mavio]:https://mavlink.io/en/messages/common.html
 

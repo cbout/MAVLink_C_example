@@ -1,12 +1,12 @@
 # MAVLink_C_example #
 
-This project was released by BERGOIN Raphäel and BOUT Clément, students in the University of Cergy-Pontoise. It contains some examples and explanation of our understanding of the MAVLink C library (refer to this [github project ][c_lib] to see the entire MAVLink c library project).
+This project was released by BERGOIN Raphäel and BOUT Clément, students in the University of Cergy-Pontoise. It contains some examples and explanation of our understanding of the MAVLink C library (refer to this [github project ][c_lib] to see the entire MAVLink c library project). This explanation are made for beginners in MAVLink by beginners.
 
 ## Introduction ##
 
 As part of our studies, in the [Master 1 Computer sciences and engineering of complex systems (IISC)][miisc], we work with the [ETIS][etis] laboratory to release a sort of ground station (GS) in C for a 3DR Solo Drone with the aim to implement a neural network able to control the drone by using this GS.
 
-In order to realize our project we have decided to use the [c_library_v1][c_lib] (MIT-licenced project) and we do not find an easy tutorial to understand MAVLink and the C library. That is why we are going to summarize all the information we have found about MAVLink and the C library. We will also expose our understanding of the MAVLink v1 communication and the C library across some examples in the folder **`examples/`**. We are not so presumptuous to consider that our understanding and using are the best way to use the [c_library_v1][c_lib]. It would be nice to tell us our mistakes or misunderstanding.
+In order to realize our project we have decided to use the [c_library_v1][c_lib] (MIT-licenced project) and we do not find an easy tutorial to understand MAVLink and the C library. That is why we are going to summarize all the information we have found about MAVLink and the C library. We will also expose our understanding of the MAVLink v1 communication and the C library across some examples in the folder **`examples/`**. We are not so presumptuous to consider that our understanding and using are the best way to use the [c_library_v1][c_lib] and MAVLink. It would be nice to tell us our mistakes or misunderstanding.
 
 ## MAVLink
 
@@ -50,7 +50,7 @@ The heartbeat is one of the most important message, GS have to send it each seco
 | system_status   | uint8_t  | [MAV_STATE](https://mavlink.io/en/messages/common.html#MAV_STATE) | System status              |
 | mavlink_version | uint8_t  |                                                              | MAVLink version            |
 
-For example, for a heartbeat the message will looking to this :
+For example, for a heartbeat, the pack message will looking to this :
 
 |          MAVLink version          |   Payload length   |           Packet sequence           |         Systeme ID         |           Component ID            |       Message ID        |            Data            | Checksum |
 | :-------------------------------: | :----------------: | :---------------------------------: | :------------------------: | :-------------------------------: | :---------------------: | :------------------------: | -------- |

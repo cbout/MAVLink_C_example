@@ -58,11 +58,14 @@ int main(void)
 			for (i = 0; i < recsize; ++i)
 			{
 				temp = buf[i];
-				printf("%02x ", (unsigned char)temp);
+				/* RTP data */
+				if(i>=12){
+					printf("%02x ", (unsigned char)temp);
+				}
 			}
 		}
 		
-		sleep(1);
+		//sleep(1);
 	}
 
 	close(s2);

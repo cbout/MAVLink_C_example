@@ -10,7 +10,7 @@
 
 
 /**
- * @brief      Main
+ * @brief      Receive video stream data from the solo 3DR drone
  *
  * @return     0
  */
@@ -58,14 +58,15 @@ int main(void)
 			for (i = 0; i < recsize; ++i)
 			{
 				temp = buf[i];
-				/* RTP data */
+				
+				/* Only keep datas without RTP header */
 				if(i>=12){
 					printf("%02x ", (unsigned char)temp);
 				}
 			}
 		}
 		
-		//sleep(1);
+		sleep(1);
 	}
 
 	close(s2);

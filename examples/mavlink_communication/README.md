@@ -17,6 +17,8 @@ This file contains an example of UDP connection to a 3DR Solo Drone.
 
 ## Mavlink_send_UDP
 
+To compile this file use this commande in this folder.
+
 ```bash
 gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega mavlink_send_UDP_test.c -o mavlink_send_UDP_test
 ./mavlink_send_UDP_test
@@ -25,6 +27,8 @@ gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega mavlink_send_UDP_test.c
 
 
 ## Mavlink_receive_UDP
+
+To compile this file use this commande in this folder.
 
 ```bash
 gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega  mavlink_receive_UDP_test.c -o mavlink_receive_UDP_test
@@ -35,6 +39,8 @@ gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega  mavlink_receive_UDP_te
 
 ## Mavlink_message_decode
 
+To compile this file use this commande in this folder.
+
 ```bash
 gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega  mavlink_message_decode_test.c -o mavlink_message_decode_test
 ./mavlink_message_decode_test
@@ -43,6 +49,8 @@ gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega  mavlink_message_decode
 
 
 ## Mavlink_send_order_UDP
+
+To compile this file use this commande in this folder.
 
 ```bash
 gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega mavlink_send_order_test.c -o mavlink_send_order_test

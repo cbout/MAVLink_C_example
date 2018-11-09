@@ -237,7 +237,7 @@ Now you know you have to put the param `MAV_CMD_NAV_ROI` in the function and you
 
 ## Conclusion
 
-Now you are ready to understand this library. If you want some concrete example of implementation you can refer to our folder [examples/](../examples). We hope this file helps you to understand MAVLink_C Library. 
+Now you are ready to understand this library. If you want some concretes examples of implementation you can refer to our folder [examples/](../examples). We hope this file helps you to understand MAVLink_C Library. 
 
 [devguide]:https://mavlink.io/en/	"MAVLink's libs general dev guide"
 [c_lib]: https://github.com/mavlink/c_library_v1	"C library v1 repository"

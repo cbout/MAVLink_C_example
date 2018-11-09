@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The c_library_v1 is an auto-generated library, for the general developer guide click [here][devguide]. You can find it in this [repository][c_lib]. If you want more information about the formation we follow see [M1 IISC University of Cergy-Pontoise][m1iisc] and the laboratory [ETIS][etis]. At the start of our project it would have been useful to find a simple explanation of the C library. In this file we will describe the library as we understand it and we will trying to make your research into this one easiest.
+The c_library_v1 is an auto-generated library, for the general developer guide click [here][devguide]. You can find it in this [repository][c_lib]. If you want more information about our formation see [M1 IISC University of Cergy-Pontoise][m1iisc] and the laboratory [ETIS][etis]. At the start of our project it would have been useful to find a simple explanation of the C library. In this file we will describe the library as we understand it and we will trying to make your research into this one easiest.
 
 ## Architecture
 
@@ -111,7 +111,7 @@ The `mavlink_msg_[message name].h` are the "messages" files, there is a recurrin
 
 The header contains the `#define MAVLINK_MSG_ID_[message name] <ID>` and the associate structure `mavlink_[message name]_t`, you can link the field `msgid` of the `mavlink_message_t` with the define and use the associate structure to store a message of type `[message name]`.
 
-### In the Body
+### In the Body:
 
 In the body you'll find 2 important function:
 

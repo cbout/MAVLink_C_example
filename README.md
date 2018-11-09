@@ -60,7 +60,7 @@ For example, for a heartbeat, the pack message will looking to this :
 Data :
 
 * type: MAV_TYPE_GCS (0x06)
-* autopilot: MAV_AUTOPILOT_ARDU_PILOTMEGA(0x03)
+* autopilot: MAV_AUTOPILOT_ARDUPILOTMEGA(0x03)
 * base mode: MAV_MODE_FLAG_SAFETY_ARMED + MAV_MODE_FLAG_MANUAL_INPUT_ENABLED = (0xc0)
 * custom mode: No custom mode(0x00 00 00 00)
 * systeme status: MAV_STATE_ACTIVE(0x04)
@@ -70,12 +70,13 @@ There is different types of messages, some messages will just send data (like th
 
 ## How to use it in C?
 
-You can refer to our folder `examples/` and its [README](examples/README.md) to see some implementation of MAVLink in C, there is also this [README](./include/README.md) in `include/` to simplify the [c_library_v1][c_lib] understanding.
+You can refer to this [README](./include/README.md) to see an explanation of the  [c_library_v1][c_lib] to expedite your understand. We put also some example of the lib implementation tested on a 3DR Solo [here](./examples).
 
 ## Sources:
 
-http://ardupilot.org/dev/docs/copter-commands-in-guided-mode.html (for commands messages refer to : )
+TODO
 
+[ardupilot]:http://ardupilot.org/dev/docs/copter-commands-in-guided-mode.html	"Ardupilot copter commands"
 [c_lib]:https://github.com/mavlink/c_library_v1	"C library v1 repository"
 [mavlink_step_by_step]:https://discuss.ardupilot.org/t/mavlink-step-by-step/9629	"The MAVLink step by step by Pedro Albuquerque"
 [etis]:https://www-etis.ensea.fr/	"ETIS laboratory's website"

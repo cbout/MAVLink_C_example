@@ -5,6 +5,7 @@ or in the same folder as this source file */
 
 /**
  * @brief      Display video stream from the solo 3DR drone with GStreamer library
+ *			   Previously need to request video stream with TCP
  *
  * @return     0
  */

@@ -28,17 +28,24 @@ int main(void)
 {
 	
 	int sock;
-	struct sockaddr_in targetAddr;
-	struct sockaddr_in locAddr;
+	struct sockaddr_in targetAddr;				// The socket of the target address
+	struct sockaddr_in locAddr;					// The socket of the local address
+	struct sockaddr_in possibleTarget;			// The possible socket which will received our messages
+  	socklen_t possibleTargetLen = sizeof(possibleTarget);
+	uint16_t len;
 	uint8_t buf[BUFFER_LENGTH];
 	int bytes_sent;
-	mavlink_message_t msg;
-	uint16_t len;
+	
+	mavlink_message_t msg;						// Variable of type mavlink message 
 	
 	char target_ip[100];
-	strcpy(target_ip, "10.1.1.1");	//IP adress of the controler
-	int local_port = 14550;		 //Listening port
-	int timeout = 10;			//Time in second for waiting an answer from the server
+	strcpy(target_ip, "10.1.1.1");				//IP adress of the controler
+	int local_port = 14550;		 				//Listening port
+	
+	int timeout = 10;							//Time in second for waiting an answer from the server
+  	time_t currentTime;
+  	time_t startTime = time(&currentTime);
+  	double timeLeft = 0;
 
 	
 	/* Init the socket to receive datagram and support UDP protocol */
@@ -49,7 +56,8 @@ int main(void)
 	locAddr.sin_port = htons(local_port);
 	memset (&locAddr.sin_zero, 0, sizeof(locAddr.sin_zero));
 	
-	if (-1 == bind(sock,(struct sockaddr *)&locAddr, sizeof(struct sockaddr))){
+	if (-1 == bind(sock,(struct sockaddr *)&locAddr, sizeof(struct sockaddr)))
+	{
 		perror("error bind failed");
 		close(sock);
     	return -1;
@@ -72,16 +80,9 @@ int main(void)
 	}
 
 
-	/* The possible socket which will received our messages */
-	struct sockaddr_in possibleTarget;
-  	socklen_t possibleTargetLen = sizeof(possibleTarget);
-
-  	time_t currentTime;
-  	time_t startTime = time(&currentTime);
-  	double timeLeft = 0;
-
   	/* While we don't find a packet which can indicate sending port we read all messages received on our port */
-	while (recvfrom(sock, buf, sizeof(buf), 0, (struct sockaddr*)(&possibleTarget), &possibleTargetLen)<=0 || possibleTarget.sin_addr.s_addr != inet_addr(target_ip)) {
+	while (recvfrom(sock, buf, sizeof(buf), 0, (struct sockaddr*)(&possibleTarget), &possibleTargetLen)<=0 || possibleTarget.sin_addr.s_addr != inet_addr(target_ip)) 
+	{
 		
 		memset(buf,0,256);
 		time(&currentTime);
@@ -110,11 +111,13 @@ int main(void)
 	len = mavlink_msg_to_send_buffer(buf, &msg);
 	/* Send it */
 	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
-	if (bytes_sent==-1) {
+	if (bytes_sent==-1) 
+	{
 		perror("Error changing mode\n"); // If there is an error
 		exit(EXIT_FAILURE);
 	}
-	else{
+	else
+	{
 		printf("Changing mode sent\n");		//If it's done
 	}
 	memset(buf, 0, BUFFER_LENGTH);
@@ -126,11 +129,13 @@ int main(void)
 	len = mavlink_msg_to_send_buffer(buf, &msg);
 	/* Send it */
 	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
-	if (bytes_sent==-1) {
+	if (bytes_sent==-1) 
+	{
 		perror("Error arming motors\n"); // If there is an error
 		exit(EXIT_FAILURE);
 	}
-	else{
+	else
+	{
 		printf("Arming motors\n");		//If it's done
 	}
 	memset(buf, 0, BUFFER_LENGTH);
@@ -145,11 +150,13 @@ int main(void)
 	len = mavlink_msg_to_send_buffer(buf, &msg);
 	/* Send it */
 	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
-	if (bytes_sent==-1) {
+	if (bytes_sent==-1) 
+	{
 		perror("Error disarming motors\n"); // If there is an error
 		exit(EXIT_FAILURE);
 	}
-	else{
+	else
+	{
 		printf("Disarming motors\n");		//If it's done
 	}
 	memset(buf, 0, BUFFER_LENGTH);

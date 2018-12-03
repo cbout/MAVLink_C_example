@@ -19,8 +19,8 @@ or in the same folder as this source file */
 
 
 /**
- * @brief      Short program to see how to send an order of take off in mavlink to the drone
- *			   This program is an extension of the program mavlink_send_order.c and mavlink_message_decode.c
+ * @brief      Short program to see how to send an order of take off and translation in mavlink to the drone
+ *			   This program is an extension of the program mavlink_send_take_off.c
  *
  * @return     0
  */
@@ -32,26 +32,22 @@ int main(void)
 	struct sockaddr_in locAddr;					// The socket of the local address
 	struct sockaddr_in possibleTarget;			// The possible socket which will received our messages
   	socklen_t possibleTargetLen = sizeof(possibleTarget);
+	uint16_t len;
 	uint8_t buf[BUFFER_LENGTH];
 	ssize_t recsize;
 	socklen_t fromlen;
 	int bytes_sent;
-	uint16_t len;
 	
 	mavlink_channel_t chan = MAVLINK_COMM_0;	// Variable of type mavlink channel 
 	mavlink_gps_raw_int_t gps_raw_int;			// Variable of type mavlink gps_raw 
-	mavlink_message_t msg;						// Variable of type mavlink message
-	mavlink_status_t status;					// Variable of type mavlink status 
+	mavlink_message_t msg;						// Variable of type mavlink message 
 	
 	char target_ip[100];
 	strcpy(target_ip, "10.1.1.1");				//IP adress of the controler
 	int local_port = 14550;		 				//Listening port
 	
-	int i;
-	unsigned int temp = 0;
-	
 	int timeout = 10;							//Time in second for waiting an answer from the server
-  	time_t currentTime;
+	time_t currentTime;
   	time_t startTime = time(&currentTime);
   	double timeLeft = 0;
 
@@ -119,9 +115,13 @@ int main(void)
 	{	
 		memset(buf, 0, BUFFER_LENGTH);
 		recsize = recvfrom(sock, (void *)buf, BUFFER_LENGTH, 0, (struct sockaddr *)&targetAddr, &fromlen);	// reception
-		/* Something received */
 		if (recsize > 0)
 		{
+			/* Something received */
+			mavlink_message_t msg;
+			mavlink_status_t status;
+			int i;
+			unsigned int temp = 0;
 			
 			/* For each part of the tram */
 			for (i = 0; i < recsize; ++i)
@@ -142,8 +142,8 @@ int main(void)
 	
 	
 
-	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_mission_count_pack(255, 0, &msg, 1, 190, 2);	//MISSION COUNT
+	/* Packing the type of message you want in msg variable */
+	mavlink_msg_mission_count_pack(255, 0, &msg, 1, 190, 4);	//MISSION COUNT
 	
 	/* Put it in the buffer */
 	len = mavlink_msg_to_send_buffer(buf, &msg);
@@ -181,7 +181,7 @@ int main(void)
 	
 	
 	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 1, MAV_FRAME_GLOBAL_RELATIVE_ALT, MAV_CMD_NAV_TAKEOFF, 0, 1, 15, 0, 0, 0, 0, 0, 1);	//MISSION ITEM TAKEOFF 1m
+	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 1, MAV_FRAME_GLOBAL_RELATIVE_ALT, MAV_CMD_NAV_TAKEOFF, 0, 1, 15, 0, 0, 0, 0, 0, 3);	//MISSION ITEM TAKEOFF 3m
 	
 	/* Put it in the buffer */
 	len = mavlink_msg_to_send_buffer(buf, &msg);
@@ -197,6 +197,32 @@ int main(void)
 		printf("Mission item takeoff sent\n");		//If it's done
 	}
 	memset(buf, 0, BUFFER_LENGTH);
+	
+	
+	
+	
+	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 2, MAV_FRAME_GLOBAL_RELATIVE_ALT, MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0, 50, 2, 3);	//MISSION ITEM WAYPOINT to latitude : 50, longitude : 2, altitude : 3, yaw angle :  in relative way
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error mission item waypoint\n"); // If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Mission item waypoint sent\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+	
+	
+	
+	
 	
 	
 	/* Packing the type of message you want in msg variable*/

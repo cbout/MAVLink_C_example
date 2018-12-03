@@ -34,10 +34,16 @@ int main(void)
 	uint8_t buf[BUFFER_LENGTH];
 	ssize_t recsize;
 	socklen_t fromlen;
-	mavlink_channel_t chan = MAVLINK_COMM_0;
 	int local_port = 14550;		 //Listening port
 	
+	int i;
+	unsigned int temp = 0;
 	
+	mavlink_channel_t chan = MAVLINK_COMM_0;	// Variable of type mavlink channel 
+	mavlink_message_t msg;						// Variable of type mavlink message 
+	mavlink_status_t status;					// Variable of type mavlink status 
+	
+
 	/* Init the socket to receive datagram and support UDP protocol */
 	sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
@@ -46,7 +52,8 @@ int main(void)
 	locAddr.sin_port = htons(local_port);
 	memset (&locAddr.sin_zero, 0, sizeof(locAddr.sin_zero));
 	
-	if (-1 == bind(sock,(struct sockaddr *)&locAddr, sizeof(struct sockaddr))){
+	if (-1 == bind(sock,(struct sockaddr *)&locAddr, sizeof(struct sockaddr)))
+	{
 		perror("error bind failed");
 		close(sock);
     	return -1;
@@ -70,17 +77,14 @@ int main(void)
 
 
 	/* Receive packets infinitely */
-	while (1){
+	while (1)
+	{
 		
 		memset(buf, 0, BUFFER_LENGTH);
 		recsize = recvfrom(sock, (void *)buf, BUFFER_LENGTH, 0, (struct sockaddr *)&targetAddr, &fromlen);	// reception
+		/* Something received */
 		if (recsize > 0)
 		{
-			/* Something received */
-			mavlink_message_t msg;
-			mavlink_status_t status;
-			int i;
-			unsigned int temp = 0;
 			
 			printf("Bytes Received : %d\n", (int)recsize);	//Size
 			/* For each part of the tram */

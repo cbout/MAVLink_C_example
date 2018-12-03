@@ -1,3 +1,17 @@
+/*********************************************************************************************************************************
+ * 
+ * Short program to see how to initialize UDP connection for listen and send packets
+ * 
+ *
+ * 
+ *
+ * Compilation : gcc mavlink_initialization_UDP.c -o mavlink_initialization_UDP
+ * Execution : ./mavlink_initialization_UDP
+ *
+ *
+ ********************************************************************************************************************************/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdlib.h>
@@ -13,7 +27,7 @@
 
 
 /**
- * @brief      Short program to see how to initialize UDP connection for listen and send packets
+ * @brief      Main
  *
  * @return     0
  */
@@ -21,14 +35,20 @@ int main(void)
 {
 	
 	int sock;
-	struct sockaddr_in targetAddr;
-	struct sockaddr_in locAddr;
+	struct sockaddr_in targetAddr;			// The socket of the target address
+	struct sockaddr_in locAddr;				// The socket of the local address
+	struct sockaddr_in possibleTarget;		// The possible socket which will received our messages
+  	socklen_t possibleTargetLen = sizeof(possibleTarget);
 	uint8_t buf[256];
 	
 	char target_ip[100];
-	strcpy(target_ip, "10.1.1.1");	//IP adress of the controler
-	int local_port = 14550;		 //Listening port
-	int timeout = 10;			//Time in second for waiting an answer from the server
+	strcpy(target_ip, "10.1.1.1");	// IP adress of the controler
+	int local_port = 14550;		 	// Listening port
+	
+	int timeout = 10;				// Time in second for waiting an answer from the server
+  	time_t currentTime;
+  	time_t startTime = time(&currentTime);
+  	double timeLeft = 0;
 	
 	
 	/* Init the socket to receive datagram and support UDP protocol */
@@ -39,7 +59,8 @@ int main(void)
 	locAddr.sin_port = htons(local_port);
 	memset (&locAddr.sin_zero, 0, sizeof(locAddr.sin_zero));
 	
-	if (-1 == bind(sock,(struct sockaddr *)&locAddr, sizeof(struct sockaddr))){
+	if (-1 == bind(sock,(struct sockaddr *)&locAddr, sizeof(struct sockaddr)))
+	{
 		perror("error bind failed");
 		close(sock);
     	return -1;
@@ -62,16 +83,9 @@ int main(void)
 	}
 
 
-	/* The possible socket which will received our messages */
-	struct sockaddr_in possibleTarget;
-  	socklen_t possibleTargetLen = sizeof(possibleTarget);
-
-  	time_t currentTime;
-  	time_t startTime = time(&currentTime);
-  	double timeLeft = 0;
-
   	/* While we don't find a packet which can indicate sending port we read all messages received on our port */
-	while (recvfrom(sock, buf, sizeof(buf), 0, (struct sockaddr*)(&possibleTarget), &possibleTargetLen)<=0 || possibleTarget.sin_addr.s_addr != inet_addr(target_ip)) {
+	while (recvfrom(sock, buf, sizeof(buf), 0, (struct sockaddr*)(&possibleTarget), &possibleTargetLen)<=0 || possibleTarget.sin_addr.s_addr != inet_addr(target_ip)) 
+	{
 		
 		memset(buf,0,256);
 		time(&currentTime);

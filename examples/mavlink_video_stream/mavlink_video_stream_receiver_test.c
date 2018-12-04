@@ -48,7 +48,8 @@ int main(void)
 	bind (s2, (struct sockaddr *)&locAddr, sizeof locAddr);
 
 	/* Receive each tram */
-	while(1){
+	while(1)
+	{
 		memset(buf, 0, BUFFER_LENGTH);
 
 		recsize = recvfrom(s2, (void *)buf, BUFFER_LENGTH, 0, (struct sockaddr *)&serv_addr, &fromlen);
@@ -60,7 +61,8 @@ int main(void)
 				temp = buf[i];
 				
 				/* Only keep datas without RTP header */
-				if(i>=12){
+				if(i>=12)
+				{
 					printf("%02x ", (unsigned char)temp);
 				}
 			}

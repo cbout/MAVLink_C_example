@@ -10,5 +10,11 @@ gcc mavlink_video_stream_gstreamer_test_v1.c -o mavlink_video_stream_gstreamer_t
 gcc mavlink_video_stream_gstreamer_test_v2.c -o mavlink_video_stream_gstreamer_test_v2 `pkg-config --cflags --libs gstreamer-1.0`
 ./mavlink_video_stream_gstreamer_test_v2
 
+gcc mavlink_video_stream_gstreamer_test_v3.c -o mavlink_video_stream_gstreamer_test_v3 `pkg-config --cflags --libs gstreamer-1.0`
+./mavlink_video_stream_gstreamer_test_v3
+
+gcc mavlink_video_stream_gstreamer_test_v4.c -o mavlink_video_stream_gstreamer_test_v4 `pkg-config --cflags --libs gstreamer-1.0`
+./mavlink_video_stream_gstreamer_test_v4
+
 
 ctrl c to stop the program

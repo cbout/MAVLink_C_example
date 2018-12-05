@@ -9,7 +9,8 @@ or in the same folder as this source file */
  *
  * @return     0
  */
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
     
 	GstElement *pipeline;
     GstBus *bus;
@@ -25,7 +26,8 @@ int main(int argc, char *argv[]){
 	
 	/* Start playing */
 	ret = gst_element_set_state(pipeline, GST_STATE_PLAYING);
-    if (ret == GST_STATE_CHANGE_FAILURE) {
+    if (ret == GST_STATE_CHANGE_FAILURE) 
+	{
       g_printerr ("Unable to set the pipeline to the playing state.\n");
       gst_object_unref (pipeline);
       return -1;

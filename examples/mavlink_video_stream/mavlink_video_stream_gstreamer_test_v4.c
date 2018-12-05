@@ -9,8 +9,8 @@ or in the same folder as this source file */
 
 
 /**
- * @brief      Display video stream from the solo 3DR drone with GStreamer library and initialize the TCP request data stream before
- *			   This program is an extension of the program mavlink_video_stream_gstreamer_v1_test.c
+ * @brief      Display video stream from the solo 3DR drone with GStreamer library, initialize the TCP request data stream before and register video in a file
+ *			   This program is an extension of the program mavlink_video_stream_gstreamer_v3_test.c
  *
  * @return     0
  */
@@ -41,7 +41,10 @@ int main(int argc, char *argv[])
     gst_init(&argc, &argv);
 
 	/* Build the pipeline */
-    pipeline = gst_parse_launch("-v udpsrc port=5600 caps = \"application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96\" ! rtph264depay ! decodebin ! videoconvert ! autovideosink", NULL);
+	//.bmp files
+	//pipeline = gst_parse_launch("-v udpsrc port=5600 caps = \"application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96\" ! rtph264depay ! decodebin  ! tee name=t ! queue ! videorate ! avenc_bmp ! multifilesink location=\"frame/bmp/frame%06d.bmp\" t. ! queue ! videoconvert ! autovideosink t. ! queue ! avimux ! filesink location=capture.avi", NULL);
+	//.jpg files
+    pipeline = gst_parse_launch("-v udpsrc port=5600 caps = \"application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)H264, payload=(int)96\" ! rtph264depay ! decodebin  ! tee name=t ! queue ! videorate ! jpegenc ! multifilesink location=\"frame/jpg/frame%06d.jpg\" t. ! queue ! videoconvert ! autovideosink t. ! queue ! avimux ! filesink location=capture.avi", NULL);
 	bus = gst_element_get_bus(pipeline);
 	
 	/* Start playing */

@@ -19,8 +19,8 @@ or in the same folder as this source file */
 
 
 /**
- * @brief      Short program to see how to send mavlink order to the drone
- *			   This program is an extension of the program mavlink_send_UDP_test.c
+ * @brief      Short program to see how to send an order of take off in mavlink to the drone
+ *			   This program is an extension of the program mavlink_send_order.c and mavlink_message_decode.c
  *
  * @return     0
  */
@@ -32,15 +32,23 @@ int main(void)
 	struct sockaddr_in locAddr;					// The socket of the local address
 	struct sockaddr_in possibleTarget;			// The possible socket which will received our messages
   	socklen_t possibleTargetLen = sizeof(possibleTarget);
-	uint16_t len;
 	uint8_t buf[BUFFER_LENGTH];
+	ssize_t recsize;
+	socklen_t fromlen;
 	int bytes_sent;
+	uint16_t len;
 	
-	mavlink_message_t msg;						// Variable of type mavlink message 
+	mavlink_channel_t chan = MAVLINK_COMM_0;	// Variable of type mavlink channel 
+	mavlink_gps_raw_int_t gps_raw_int;			// Variable of type mavlink gps_raw 
+	mavlink_message_t msg;						// Variable of type mavlink message
+	mavlink_status_t status;					// Variable of type mavlink status 
 	
 	char target_ip[100];
 	strcpy(target_ip, "10.1.1.1");				//IP adress of the controler
 	int local_port = 14550;		 				//Listening port
+	
+	int i;
+	unsigned int temp = 0;
 	
 	int timeout = 10;							//Time in second for waiting an answer from the server
   	time_t currentTime;
@@ -104,9 +112,95 @@ int main(void)
 	/* Initialization sending done */
 	printf("INIT target : UDPout : %s:%d\n",target_ip,ntohs(targetAddr.sin_port));
 	
+	
+	/* We need informations about GPS on the next step 
+	Receive packets while we don't receive GPS_RAW_INT message */
+	while (msg.msgid != MAVLINK_MSG_ID_GPS_RAW_INT)
+	{	
+		memset(buf, 0, BUFFER_LENGTH);
+		recsize = recvfrom(sock, (void *)buf, BUFFER_LENGTH, 0, (struct sockaddr *)&targetAddr, &fromlen);	// reception
+		/* Something received */
+		if (recsize > 0)
+		{
+			
+			/* For each part of the tram */
+			for (i = 0; i < recsize; ++i)
+			{	
+				/* Parse the tram in order to get a mavlink message */
+				if (mavlink_parse_char(chan, buf[i], &msg, &status))
+				{
+					/* Decoding message */
+					if(msg.msgid == MAVLINK_MSG_ID_GPS_RAW_INT) //If the message is of type GPS_RAW_INT
+					{	
+						/* Decode informations of the message and put it in the variable */
+						mavlink_msg_gps_raw_int_decode(&msg, &gps_raw_int);
+					}				
+				}
+			}
+		}
+	}
+	
+	
 
 	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_set_mode_pack(255, 0, &msg, 1, MAV_MODE_MANUAL_ARMED+MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, COPTER_MODE_ALT_HOLD); // Request change flight mode
+	mavlink_msg_mission_count_pack(255, 0, &msg, 1, 190, 2);	//MISSION COUNT
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error\n"); // If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Mission count sent\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+	
+	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 0, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 1, 1, 0, 0, 0, 0, gps_raw_int.lat, gps_raw_int.lon, gps_raw_int.alt);	//MISSION ITEM WAYPOINT
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error mission item waypoint\n"); // If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Mission item waypoint sent\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+	
+	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 1, MAV_FRAME_GLOBAL_RELATIVE_ALT, MAV_CMD_NAV_TAKEOFF, 0, 1, 15, 0, 0, 0, 0, 0, 1);	//MISSION ITEM TAKEOFF 1m
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error mission item takeoff\n"); // If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Mission item takeoff sent\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+	
+	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_set_mode_pack(255, 0, &msg, 1, MAV_MODE_GUIDED_DISARMED+MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, COPTER_MODE_GUIDED); // Request change flight mode
 	/* Put it in the buffer */
 	len = mavlink_msg_to_send_buffer(buf, &msg);
 	/* Send it */
@@ -124,7 +218,7 @@ int main(void)
 	
 	
 	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_command_long_pack(255, 0, &msg, 1, 0, MAV_CMD_COMPONENT_ARM_DISARM, 0, 1, 0, 0, 0, 0, 0, 0);	//Request arm motors
+	mavlink_msg_command_long_pack(255, 0, &msg, 1, 1, MAV_CMD_COMPONENT_ARM_DISARM, 0, 1, 0, 0, 0, 0, 0, 0);	//Request arm motors
 	/* Put it in the buffer */
 	len = mavlink_msg_to_send_buffer(buf, &msg);
 	/* Send it */
@@ -141,25 +235,23 @@ int main(void)
 	memset(buf, 0, BUFFER_LENGTH);
 	
 	
-	sleep(4);
-	
-	
 	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_command_long_pack(255, 0, &msg, 1, 0, MAV_CMD_COMPONENT_ARM_DISARM, 0, 0, 0, 0, 0, 0, 0, 0);	//Request disarm motors
+	mavlink_msg_command_long_pack(255, 0, &msg, 1, 1, MAV_CMD_MISSION_START, 0, 0, 0, 0, 0, 0, 0, 0);	//Request start mission
 	/* Put it in the buffer */
 	len = mavlink_msg_to_send_buffer(buf, &msg);
 	/* Send it */
 	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
 	if (bytes_sent==-1) 
 	{
-		perror("Error disarming motors\n"); // If there is an error
+		perror("Error starting mission\n"); // If there is an error
 		exit(EXIT_FAILURE);
 	}
 	else
 	{
-		printf("Disarming motors\n");		//If it's done
+		printf("Mission start\n");		//If it's done
 	}
 	memset(buf, 0, BUFFER_LENGTH);
+
 	
 	
 	/* End */

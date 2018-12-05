@@ -6,17 +6,17 @@ The c_library_v1 is an auto-generated library, for the general developer guide c
 
 ## Architecture
 
-The c_library_v1 is composed by various folders, the main folder is  **`common/`** which contains global MAVLink standard messages and structure, there is also **`minimal/`**, **`standard/`**,  **`icarous/`** and **`uAvionix/`** which do not implement all the common messages. Other folders are sort of "plug in" library that implement specific messages standard, like the folder **`ardupilotmega/`**, this one implements all the function of `common/`, `uAvionix/` and `icarous/`, it also adds standard **ardupilot** function, each specific autopilot has its own folder (**`ASLUAV/`**, **`slugs/`**, **`matrixpilot/`**, **`autoquad/`** and **`ardupilotpmega/`**). You can see all the base include of a `[folder name]/` at the end of the file called : `[folder name].h`.
+The c_library_v1 is composed by various folders, the main folder is  **`common/`** which contains global MAVLink standard messages and structure, there is also **`minimal/`**, **`standard/`**,  **`icarous/`** and **`uAvionix/`** which do not implement all the common messages. Other folders are sort of "plug in" library that implement specific messages standard, like the folder **`ardupilotmega/`**, this one implements all the function of `common/`, `uAvionix/` and `icarous/`, it also adds standard **ardupilot** function, each specific autopilot has its own folder (**`ASLUAV/`**, **`slugs/`**, **`matrixpilot/`**, **`autoquad/`** and **`ardupilotpmega/`**). You can see all the base include of a **`<folder_name>/`** at the end of the file called : **`<folder_name>.h`**.
 
 ## How to include?
 
-The include is the same for all autopilot, in your `.c` file you have just to insert in header this include : `#include <mavlink.h>`. The only change is in the compilation, in fact if you want to use just common messages, just add `-I [path]/c_library_v1/common` in your gcc command line. In the same way, if you want to use ardupilot messages just use `-I [path]/c_library_v1/ardupilotmega` instead of the last one.
+The include is the same for all autopilot, in your `.c` file you have just to insert in header this include : `#include <mavlink.h>`. The only change is in the compilation, in fact if you want to use just common messages, just add `-I <path>/c_library_v1/common` in your gcc command line. In the same way, if you want to use ardupilot messages just use `-I <path>/c_library_v1/ardupilotmega` instead of the last one. You can also use the relative path with `#include "<path>/mavlink.h"`.
 
 ## Main structures and functions
 
 ### Structures:
 
-All this structure can be found in the root of the library in the file : `mavlink_types.h`. 
+All those structures can be found in the root of the library in the file : `mavlink_types.h`. 
 
 The main structure of this library is the `mavlink_message_t`:
 
@@ -53,9 +53,9 @@ typedef struct __mavlink_status {
 
 ### Functions:
 
-This functions can be found in the root of the library in the file : `mavlink_helpers.c`
+Those functions can be found in the root of the library in the file : `mavlink_helpers.c`
 
-To send message with this library you have to create a `mavlink_message_t` with the good function (i will describe those function later) then put your messages in a buffer with this function :
+To send a message with this library you have to create a `mavlink_message_t` with the good function (we will describe how later) then put your message in a buffer with this function :
 
 ```c
 /**
@@ -94,29 +94,29 @@ for (int i = 0; i < repSize; i++)
     if (mavlink_parse_char(MAVLINK_COMM_0, buf[i], &msg, &status))
     {
         printf("Received packet: SYS: %d, COMP: %d, PAYLOAD LEN: %d, MSG ID: %d\n", msg.sysid, msg.compid, msg.len, msg.msgid);
-        // Do the treat by msgid
+        // Do the treat by msgid (message id)
     }
 }
 ```
 
-With this function you are able to send a pack message and parse a message, but the payload is always a binary field and you do not know how to create this message, we will now start to study pattern and function that exist to manipulate message, each sub-library work in the same way.
+With this function you are able to send a pack message and parse a message, but the payload is always a binary field and you do not know how to create this message. We will now start to study pattern and function that exist to manipulate messages, each sub-library work in the same way.
 
 ## Messages
 
-In most of folders you will find many functions and files, the most important one is `[folder names].h`(e.g. `common.h` for `common/`), it contains all the `defines` (except messages' id) and `enum` that allows you to make a readable code. You will need to inspect many times this file to find the great parameters for a message, we will come back later on the utility of those `defines` and `enum`.
+In most of folders you will find many functions and files, the most important one is **`<folder_names>.h`**(e.g. **`common.h`** for **`common/`**), it contains all the **`defines`** (except messages' id) and **`enum`** that allows you to make a readable code. You will need to inspect many times this file to find the great parameters for a message, we will come back later on the utility of those `defines` and `enum`.
 
-The `mavlink_msg_[message name].h` are the "messages" files, there is a recurring pattern in each file, it contains method to code, decode and manipulate a MAVLink message. The pattern is the following:
+The **`mavlink_msg_<message_name>.h`** are the messages' files, there is a recurring pattern in each files, it contains method **to code, decode** and **manipulate** a MAVLink message. The global pattern is the following:
 
-### In Headers:
+### In Header:
 
-The header contains the `#define MAVLINK_MSG_ID_[message name] <ID>` and the associate structure `mavlink_[message name]_t`, you can link the field `msgid` of the `mavlink_message_t` with the define and use the associate structure to store a message of type `[message name]`.
+The header contains the **`#define MAVLINK_MSG_ID_<message_name> <ID>`** and the associated structure **`mavlink_<message_name>_t`**. You can also find an abstract of the messages' id [here][mavid].
 
 ### In the Body:
 
-In the body you'll find 2 important function:
+In the body you'll find 2 important functions:
 
-* `mavlink_msg_[message name]_decode()`
-* `mavlink_msg_[message name]_pack()`
+* `mavlink_msg_<message_name>_decode()` to decode a message of type `mavlink_message_t` into a specific `mavlink_<message_name>__t` structure.
+* `mavlink_msg_<message_name>_pack()` to pack a specific `mavlink_<message_name>__t` structure into a `mavlink_message_t `.
 
 #### The decode
 
@@ -124,24 +124,24 @@ The decode function has always the same pattern of parameters :
 
 ```c
 /**
- * @brief Decode a [message name] into a struct mavlink_[message name]_t
+ * @brief Decode a <message_name> into a struct mavlink_<message_name>_t
  *
  * @param msg The message to decode
  * @param decode_message C-struct to decode the message contents into
  */
-static inline void mavlink_msg_[message name]_decode(const mavlink_message_t* msg, mavlink_[message name]_t* decode_message);
+static inline void mavlink_msg_<message_name>_decode(const mavlink_message_t* msg, mavlink_<message_name>_t* decode_message);
 
 ```
 
-And then you have just to refer to `mavlink_[message name]_t` structure to know fields a to use it.
+And then you have just to refer to `mavlink_<message_name>_t` structure to know fields and using it.
 
 #### The Filling of the MAVLink message
 
-The pack function creates a `mavlink_message_t` ready to be putting in the buffer, the first three parameters are always the same but the rest depends on the message type and his parameters. 
+The pack function creates a `mavlink_message_t` ready to be putting in the buffer, the first three parameters are always the same but the rest depends on the message type and its parameters. 
 
 ```c
 /**
- * @brief Pack a [message name] message
+ * @brief Pack a <message_name> message
  *
  * @param system_id ID of this system
  * @param component_id ID of this component (e.g. 200 for IMU)
@@ -149,17 +149,23 @@ The pack function creates a `mavlink_message_t` ready to be putting in the buffe
  *
  * @return length of the message in bytes (excluding serial stream start sign)
  */
-static inline uint16_t mavlink_msg_[message name]_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,[Specific parameters]);
+static inline uint16_t mavlink_msg_<message_name>_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,<Specific_parameters>);
 
 ```
 
-To find values of those specifics parameters you can refer to the [dev guide][devguide_io] to find your message definition then you have to refer to `[folder name].h` to find the correct enum's name to use.
+To find values of those specifics parameters you can refer to the [dev guide][devguide_io] to find your message definition then you have to refer to `<folder_name>.h` to find the correct enum's name to use.
 
 ### Example
 
 If we take the example of the command long message of `common.h`, in `mavlink_msg_command_long.h`.
 
-In this file you'll see the `mavlink_command_long_t` struct:
+In this file you'll see the command long message ID :
+
+```c
+#define MAVLINK_MSG_ID_COMMAND_LONG 76
+```
+
+Then there is the `mavlink_command_long_t` struct:
 
 ```c
 typedef struct __mavlink_command_long_t {
@@ -218,7 +224,7 @@ It's look a little bit mystic like that and it is if you don't know where to fin
 | param6           | float    |                   | Parameter 6 (for the specific command).                      |
 | param7           | float    |                   | Parameter 7 (for the specific command).                      |
 
-You may say "i have no more information", but as you can see there is a link in value column ([MAV_CMD][mavcmd])., this column will be your best friend while you are coding (except if you are a MAVLink expert). Once you know the name of the enum to put in parameters, you can go find the associated enum in `common.h` or you can follow the link and find the command you want to do.
+You may say "i have no more information", but as you can see there is a link in value column ([MAV_CMD][mavcmd]), this column will be your best friend while you are coding (except if you are a MAVLink expert). Once you know the name of the enum to put in parameters, you can go find the associated enum in `common.h` or you can follow the link and find the command you want to do.
 
 If we want to use the command : 
 
@@ -241,7 +247,8 @@ Now you are ready to understand this library. If you want some concretes example
 
 [devguide]:https://mavlink.io/en/	"MAVLink's libs general dev guide"
 [c_lib]: https://github.com/mavlink/c_library_v1	"C library v1 repository"
-[devguide_io]: https://mavlink.io/en/messages/
+[mavid]: https://groups.google.com/forum/#!topic/mavlink/1zgHUM67E-A	"Summary of messages' id"
+[devguide_io]: https://mavlink.io/en/messages/	"Global MAVLink dev-guide"
 [cmdlong]:https://mavlink.io/en/messages/common.html#COMMAND_LONG
 [mavcmd]:https://mavlink.io/en/messages/common.html#MAV_CMD
 [etis]: https://www-etis.ensea.fr/	"ETIS laboratory's website"

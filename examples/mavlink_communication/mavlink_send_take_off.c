@@ -1,3 +1,48 @@
+/**********************************************************************************************************************************************************
+ Copyright  ETIS — ENSEA, Université de Cergy-Pontoise, CNRS (1991-2018)
+ promethe@ensea.fr
+
+
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! THIS PROGRAM IS NOT TESTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ Short program to see how to send an order of take off in mavlink to the drone.
+ This program is an extension of the program mavlink_send_order.c and mavlink_message_decode.c.
+ After performing actions of the previous programs to initialize socket, seing how to send mavlink order in UDP and seing how to receive and decode a mavlink message.
+ First of all, we have to get informations about GPS.
+ So in the same way than before, while we don't receive a "GPS_RAW_INT" message, we listen incoming messages and decode it when we receive the right one.
+ Now we can write the mission.
+ First step, we send a "MISSION COUNT" message in the same way that we have seen previously.
+ Then a "MISSION ITEM" message of type "WAYPOINT".
+ Next a "MISSION ITEM" message of type "TAKEOFF".
+ After that we have to request to change flight mode and to request to arm motors, doing the same process than in the mavlink_send_order file.
+ Finnaly, we request to start mission with a "command_long" message.
+
+ This software is governed by the CeCILL v2.1 license under French law and abiding by the rules of distribution of free software.
+ You can use, modify and/ or redistribute the software under the terms of the CeCILL v2.1 license as circulated by CEA, CNRS and INRIA at the following URL "http://www.cecill.info".
+ As a counterpart to the access to the source code and  rights to copy, modify and redistribute granted by the license,
+ users are provided only with a limited warranty and the software's author, the holder of the economic rights,  and the successive licensors have only limited liability.
+ In this respect, the user's attention is drawn to the risks associated with loading, using, modifying and/or developing or reproducing the software by the user in light of its specific status of free software,
+ that may mean  that it is complicated to manipulate, and that also therefore means that it is reserved for developers and experienced professionals having in-depth computer knowledge.
+ Users are therefore encouraged to load and test the software's suitability as regards their requirements in conditions enabling the security of their systems and/or data to be ensured
+ and, more generally, to use and operate it in the same conditions as regards security.
+ The fact that you are presently reading this means that you have had knowledge of the CeCILL v2.1 license and that you accept its terms.
+ 
+
+ See more details about this program in files : documentation_communication, mavlink-devguide and mavlink_protocol.
+ 
+ 
+ Compilation : 
+ cd /mavlink_communication
+ gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega mavlink_send_take_off.c -o mavlink_send_take_off
+ 
+ Execution : 
+ ./mavlink_send_take_off
+
+**********************************************************************************************************************************************************/
+/*********************************************************************************************************************************************************
+ Authors: Raphael Bergoin, Clement Bout
+ Created: 11/2018
+**********************************************************************************************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdlib.h>
@@ -19,9 +64,8 @@ or in the same folder as this source file */
 
 
 /**
- * @brief      Short program to see how to send an order of take off in mavlink to the drone
- *			   This program is an extension of the program mavlink_send_order.c and mavlink_message_decode.c
- *
+ * @brief      Main
+ *			   
  * @return     0
  */
 int main(void)

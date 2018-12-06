@@ -1,3 +1,44 @@
+/**********************************************************************************************************************************************************
+ Copyright  ETIS — ENSEA, Université de Cergy-Pontoise, CNRS (1991-2018)
+ promethe@ensea.fr
+
+
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! THIS PROGRAM IS NOT FINISHED AND TESTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ Short program to see how to send an order of take off and translation in mavlink to the drone.
+ This program is an extension of the program mavlink_send_take_off.c.
+ After performing the actions of the previous program, namely : initialize socket, get informations about GPS, create the mission, and send the differents requests.
+ We will add to "MISSION ITEM" at the mission.
+ To do that we firstly send a new "MISSION ITEM" message of type "WAYPOINT" after the first "TAKEOFF"
+ Next we send a "MISSION ITEM" message of type "MAV_CMD_DO_CHANGE_SPEED".
+ After that we finish in the same way than in the mavlink_send_take_off file.
+
+ This software is governed by the CeCILL v2.1 license under French law and abiding by the rules of distribution of free software.
+ You can use, modify and/ or redistribute the software under the terms of the CeCILL v2.1 license as circulated by CEA, CNRS and INRIA at the following URL "http://www.cecill.info".
+ As a counterpart to the access to the source code and  rights to copy, modify and redistribute granted by the license,
+ users are provided only with a limited warranty and the software's author, the holder of the economic rights,  and the successive licensors have only limited liability.
+ In this respect, the user's attention is drawn to the risks associated with loading, using, modifying and/or developing or reproducing the software by the user in light of its specific status of free software,
+ that may mean  that it is complicated to manipulate, and that also therefore means that it is reserved for developers and experienced professionals having in-depth computer knowledge.
+ Users are therefore encouraged to load and test the software's suitability as regards their requirements in conditions enabling the security of their systems and/or data to be ensured
+ and, more generally, to use and operate it in the same conditions as regards security.
+ The fact that you are presently reading this means that you have had knowledge of the CeCILL v2.1 license and that you accept its terms.
+ 
+
+ See more details about this program in files : documentation_communication, mavlink-devguide and mavlink_protocol.
+ 
+ 
+ Compilation : 
+ cd /mavlink_communication
+ gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega mavlink_send_take_off_translation.c -o mavlink_send_take_off_translation
+ 
+ Execution : 
+ ./mavlink_send_take_off_translation
+
+**********************************************************************************************************************************************************/
+/*********************************************************************************************************************************************************
+ Authors: Raphael Bergoin, Clement Bout
+ Created: 12/2018
+**********************************************************************************************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdlib.h>
@@ -19,8 +60,7 @@ or in the same folder as this source file */
 
 
 /**
- * @brief      Short program to see how to send an order of take off and translation in mavlink to the drone
- *			   This program is an extension of the program mavlink_send_take_off.c
+ * @brief      Main
  *
  * @return     0
  */
@@ -162,7 +202,7 @@ int main(void)
 	
 	
 	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 0, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 1, 1, 0, 0, 0, 0, gps_raw_int.lat, gps_raw_int.lon, gps_raw_int.alt);	//MISSION ITEM WAYPOINT
+	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 0, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 1, 1, 0, 0, 0, 0, gps_raw_int.lat, gps_raw_int.lon, gps_raw_int.alt);	//MISSION ITEM WAYPOINT to the current position
 	
 	/* Put it in the buffer */
 	len = mavlink_msg_to_send_buffer(buf, &msg);
@@ -199,9 +239,6 @@ int main(void)
 	memset(buf, 0, BUFFER_LENGTH);
 	
 	
-	
-	
-	
 	/* Packing the type of message you want in msg variable*/
 	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 2, MAV_FRAME_GLOBAL_RELATIVE_ALT, MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0, 50, 2, 3);	//MISSION ITEM WAYPOINT to latitude : 50, longitude : 2, altitude : 3, yaw angle :  in relative way
 	
@@ -221,7 +258,23 @@ int main(void)
 	memset(buf, 0, BUFFER_LENGTH);
 	
 	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 3, MAV_FRAME_MISSION, MAV_CMD_DO_CHANGE_SPEED, 0, 1, 3, 0.5, -1, 0, 0, 0, 0);	//MISSION ITEM MAV_CMD_DO_CHANGE_SPEED of type Ground Speed, at 3m/s and no change 
 	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error mission item waypoint\n"); // If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Mission item waypoint sent\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
 	
 	
 	

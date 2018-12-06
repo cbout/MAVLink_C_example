@@ -1,3 +1,14 @@
+Order :
+1) mavlink_initialization_UDP
+2) mavlink_send_UDP
+3) mavlink_receive_UDP
+4) mavlink_message_decode
+5) mavlink_send_order
+6) mavlink_send_take_off
+7) mavlink_send_take_off_translation
+
+
+
 cd /mavlink_communication
 
 
@@ -18,6 +29,9 @@ gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega -o mavlink_send_order m
 
 gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega -o mavlink_send_take_off mavlink_send_take_off.c
 ./mavlink_send_take_off
+
+gcc -std=c99 -I ../../include/c_library_v1/ardupilotmega -o mavlink_send_take_off_translation mavlink_send_take_off_translation.c
+./mavlink_send_take_off_translation
 
 
 ctrl c to stop the program

@@ -47,6 +47,25 @@ or in the same folder as this source file */
 
 
 /**
+ * @brief    	Initialize a TCP connection in order to request video stream
+ *
+ * @param	s			The socket
+ * @param	serv_addr	Struct of the socket
+ *
+ */
+void initializeTCPConnection(int *s, struct sockaddr_in *serv_addr){
+	*s = socket(PF_INET, SOCK_STREAM, 0);
+
+	serv_addr->sin_family = AF_INET;
+	serv_addr->sin_addr.s_addr = inet_addr ("10.1.1.1");	// Address of the server
+	serv_addr->sin_port = htons (5502);	// Port of the server
+	memset (serv_addr->sin_zero, 0, sizeof(serv_addr->sin_zero));
+	
+	connect (*s, (struct sockaddr *)serv_addr, sizeof *serv_addr);
+}
+
+
+/**
  * @brief      Main
  *
  * @return     0
@@ -64,14 +83,7 @@ int main(int argc, char *argv[])
 	
 
 	/* Initialize a TCP connection in order to request video stream */
-	s = socket(PF_INET, SOCK_STREAM, 0);
-
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = inet_addr ("10.1.1.1");	// Address of the server
-	serv_addr.sin_port = htons (5502);	// Port of the server
-	memset (&serv_addr.sin_zero, 0, sizeof(serv_addr.sin_zero));
-	
-	connect (s, (struct sockaddr *)&serv_addr, sizeof serv_addr);
+	initializeTCPConnection(&s, &serv_addr);
 
 	
 	/* Initialize GStreamer */

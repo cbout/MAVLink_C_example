@@ -3,7 +3,7 @@
  promethe@ensea.fr
 
 
- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! THIS PROGRAM IS NOT FINISHED AND TESTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! THIS PROGRAM IS NOT TESTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  Short program to see how to send an order of take off and translation in mavlink to the drone.
  This program is an extension of the program mavlink_send_take_off.c.
  After performing the actions of the previous program, namely : initialize socket, get informations about GPS, create the mission, and send the differents requests.
@@ -60,6 +60,366 @@ or in the same folder as this source file */
 
 
 /**
+ * @brief      	Send the order to start the mission
+ *
+ * @param		sock		the socket
+ * @param		targetAddr	the structure of the target socket
+ *			   
+ */
+void startMission(int *sock, struct sockaddr_in *targetAddr){
+	
+	int bytes_sent;
+	uint16_t len;
+	mavlink_message_t msg;						// Variable of type mavlink message
+	uint8_t buf[BUFFER_LENGTH];
+	
+	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_command_long_pack(255, 0, &msg, 1, 1, MAV_CMD_MISSION_START, 0, 0, 0, 0, 0, 0, 0, 0);	//Request start mission
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(*sock, buf, len, 0, (struct sockaddr*)targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error\n"); 					// If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Mission start\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+}
+
+
+/**
+ * @brief      	Send the order to arm motors
+ *
+ * @param		sock		the socket
+ * @param		targetAddr	the structure of the target socket
+ *			   
+ */
+void armMotors(int *sock, struct sockaddr_in *targetAddr){
+	
+	int bytes_sent;
+	uint16_t len;
+	mavlink_message_t msg;						// Variable of type mavlink message
+	uint8_t buf[BUFFER_LENGTH];
+	
+	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_command_long_pack(255, 0, &msg, 1, 1, MAV_CMD_COMPONENT_ARM_DISARM, 0, 1, 0, 0, 0, 0, 0, 0);	//Request arm motors
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(*sock, buf, len, 0, (struct sockaddr*)targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error\n"); 					// If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Arming motors\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+}
+
+
+/**
+ * @brief      	Send a set mode
+ *
+ * @param		sock		the socket
+ * @param		targetAddr	the structure of the target socket
+ *			   
+ */
+void sendSetmode(int *sock, struct sockaddr_in *targetAddr){
+	
+	int bytes_sent;
+	uint16_t len;
+	mavlink_message_t msg;						// Variable of type mavlink message
+	uint8_t buf[BUFFER_LENGTH];
+	
+	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_set_mode_pack(255, 0, &msg, 1, MAV_MODE_GUIDED_DISARMED+MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, COPTER_MODE_GUIDED); // Request change flight mode
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(*sock, buf, len, 0, (struct sockaddr*)targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error\n"); 					// If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Changing mode sent\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+}
+
+
+/**
+ * @brief      	Send the order to change speed
+ *
+ * @param		sock		the socket
+ * @param		targetAddr	the structure of the target socket
+ *			   
+ */
+void changeSpeed(int *sock, struct sockaddr_in *targetAddr){
+	
+	int bytes_sent;
+	uint16_t len;
+	mavlink_message_t msg;						// Variable of type mavlink message
+	uint8_t buf[BUFFER_LENGTH];
+	
+	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 3, MAV_FRAME_MISSION, MAV_CMD_DO_CHANGE_SPEED, 0, 1, 3, 0.5, -1, 0, 0, 0, 0);	//MISSION ITEM MAV_CMD_DO_CHANGE_SPEED of type Ground Speed, at 3m/s and no change 
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(*sock, buf, len, 0, (struct sockaddr*)targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error\n"); 					// If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Change speed sent\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+}
+
+
+/**
+ * @brief      	Send the second mission item waypoint
+ *
+ * @param		sock		the socket
+ * @param		targetAddr	the structure of the target socket
+ *			   
+ */
+void sendWaypoint2(int *sock, struct sockaddr_in *targetAddr){
+	
+	int bytes_sent;
+	uint16_t len;
+	mavlink_message_t msg;						// Variable of type mavlink message
+	uint8_t buf[BUFFER_LENGTH];
+	
+	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 2, MAV_FRAME_GLOBAL_RELATIVE_ALT, MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0, 50, 2, 3);	//MISSION ITEM WAYPOINT to latitude : 50, longitude : 2, altitude : 3, yaw angle :  in relative way
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(*sock, buf, len, 0, (struct sockaddr*)targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error\n"); 					// If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Mission item waypoint sent\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+}
+
+
+/**
+ * @brief      	Send a mission item take off
+ *
+ * @param		sock		the socket
+ * @param		targetAddr	the structure of the target socket
+ *			   
+ */
+void sendTakeoff(int *sock, struct sockaddr_in *targetAddr){
+	
+	int bytes_sent;
+	uint16_t len;
+	mavlink_message_t msg;						// Variable of type mavlink message
+	uint8_t buf[BUFFER_LENGTH];
+	
+	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 1, MAV_FRAME_GLOBAL_RELATIVE_ALT, MAV_CMD_NAV_TAKEOFF, 0, 1, 15, 0, 0, 0, 0, 0, 3);	//MISSION ITEM TAKEOFF 3m
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(*sock, buf, len, 0, (struct sockaddr*)targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error\n"); 					// If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Mission item takeoff sent\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+}
+
+
+/**
+ * @brief      	Send the first mission item waypoint
+ *
+ * @param		sock		the socket
+ * @param		targetAddr	the structure of the target socket
+ *			   
+ */
+void sendWaypoint1(int *sock, struct sockaddr_in *targetAddr, mavlink_gps_raw_int_t gps_raw_int){
+	
+	int bytes_sent;
+	uint16_t len;
+	mavlink_message_t msg;						// Variable of type mavlink message
+	uint8_t buf[BUFFER_LENGTH];
+	
+	
+	/* Packing the type of message you want in msg variable*/
+	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 0, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 1, 1, 0, 0, 0, 0, gps_raw_int.lat, gps_raw_int.lon, gps_raw_int.alt);	//MISSION ITEM WAYPOINT to the current position
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(*sock, buf, len, 0, (struct sockaddr*)targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error\n"); 					// If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Mission item waypoint sent\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+}
+
+
+/**
+ * @brief      	Send the mission count
+ *
+ * @param		sock		the socket
+ * @param		targetAddr	the structure of the target socket
+ *			   
+ */
+void sendMissionCount(int *sock, struct sockaddr_in *targetAddr){
+	
+	int bytes_sent;
+	uint16_t len;
+	mavlink_message_t msg;						// Variable of type mavlink message
+	uint8_t buf[BUFFER_LENGTH];
+	
+	
+	/* Packing the type of message you want in msg variable */
+	mavlink_msg_mission_count_pack(255, 0, &msg, 1, 190, 4);	//MISSION COUNT
+	
+	/* Put it in the buffer */
+	len = mavlink_msg_to_send_buffer(buf, &msg);
+	/* Send it */
+	bytes_sent = sendto(*sock, buf, len, 0, (struct sockaddr*)targetAddr, sizeof(struct sockaddr_in));
+	if (bytes_sent==-1) 
+	{
+		perror("Error\n"); 					// If there is an error
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		printf("Mission count sent\n");		//If it's done
+	}
+	memset(buf, 0, BUFFER_LENGTH);
+}
+
+
+/**
+ * @brief      	Init the socket to receive datagram and support UDP protocol
+ *
+ * @param		sock	the socket
+ * @param		locAddr		the structure of the local socket
+ * @param		targetAddr	the structure of the target socket
+ * @param		local_port	the listening port
+ * @param		target_ip	the IP adress of the target
+ *			   
+ * @return     -1 if there is a problem, 0 else
+ */
+int initialize_UDP(int *sock, struct sockaddr_in *locAddr, struct sockaddr_in *targetAddr, int local_port, char *target_ip){
+	
+	struct sockaddr_in possibleTarget;						// The possible socket which will received our messages
+  	socklen_t possibleTargetLen = sizeof(possibleTarget);
+	uint8_t buf[BUFFER_LENGTH];
+	
+	int timeout = 10;							//Time in second for waiting an answer from the server
+  	time_t currentTime;
+  	time_t startTime = time(&currentTime);
+  	double timeLeft = 0;
+	
+	*sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+	locAddr->sin_family = AF_INET;
+	locAddr->sin_addr.s_addr = INADDR_ANY;
+	locAddr->sin_port = htons(local_port);
+	memset (locAddr->sin_zero, 0, sizeof(locAddr->sin_zero));
+	
+	if (-1 == bind(*sock,(struct sockaddr *)locAddr, sizeof(struct sockaddr)))
+	{
+		perror("error bind failed");
+		close(*sock);
+    	return -1;
+	}
+	
+	/* Initialization listenning done */
+	printf("INIT listenning :\nUDPin: 0.0.0.0:%d\n", ntohs(locAddr->sin_port));
+	
+	/* Attempt to make it non blocking */
+	#if (defined __QNX__) | (defined __QNXNTO__)
+	if (fcntl(*sock, F_SETFL, O_NONBLOCK | FASYNC) < 0)
+	#else
+	if (fcntl(*sock, F_SETFL, O_NONBLOCK | O_ASYNC) < 0)
+	#endif
+	{
+		fprintf(stderr, "error setting nonblocking: %s\n", strerror(errno));
+		close(*sock);
+    	return -1;
+	}
+	
+	
+  	/* While we don't find a packet which can indicate sending port we read all messages received on our port */
+	while (recvfrom(*sock, buf, sizeof(buf), 0, (struct sockaddr*)(&possibleTarget), &possibleTargetLen)<=0 || possibleTarget.sin_addr.s_addr != inet_addr(target_ip)) 
+	{
+		
+		memset(buf,0,256);
+		time(&currentTime);
+		timeLeft = difftime(currentTime, startTime);
+		if (timeLeft > timeout)
+		{
+			perror("Connection time out");
+			close(*sock);
+			return -1;	
+		}
+	}
+
+	/* Init the socket to send datagram and support UDP protocol */
+	targetAddr->sin_family = AF_INET;
+	targetAddr->sin_addr.s_addr = inet_addr(target_ip);
+	targetAddr->sin_port = possibleTarget.sin_port;
+	memset (targetAddr->sin_zero, 0, sizeof(targetAddr->sin_zero));
+
+	/* Initialization sending done */
+	printf("INIT target : UDPout : %s:%d\n",target_ip,ntohs(targetAddr->sin_port));
+
+	return 0;
+}
+
+
+/**
  * @brief      Main
  *
  * @return     0
@@ -70,8 +430,6 @@ int main(void)
 	int sock;
 	struct sockaddr_in targetAddr;				// The socket of the target address
 	struct sockaddr_in locAddr;					// The socket of the local address
-	struct sockaddr_in possibleTarget;			// The possible socket which will received our messages
-  	socklen_t possibleTargetLen = sizeof(possibleTarget);
 	uint16_t len;
 	uint8_t buf[BUFFER_LENGTH];
 	ssize_t recsize;
@@ -85,68 +443,12 @@ int main(void)
 	char target_ip[100];
 	strcpy(target_ip, "10.1.1.1");				//IP adress of the controler
 	int local_port = 14550;		 				//Listening port
-	
-	int timeout = 10;							//Time in second for waiting an answer from the server
-	time_t currentTime;
-  	time_t startTime = time(&currentTime);
-  	double timeLeft = 0;
 
 	
-	/* Init the socket to receive datagram and support UDP protocol */
-	sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-
-	locAddr.sin_family = AF_INET;
-	locAddr.sin_addr.s_addr = INADDR_ANY;
-	locAddr.sin_port = htons(local_port);
-	memset (&locAddr.sin_zero, 0, sizeof(locAddr.sin_zero));
-	
-	if (-1 == bind(sock,(struct sockaddr *)&locAddr, sizeof(struct sockaddr)))
-	{
-		perror("error bind failed");
-		close(sock);
-    	return -1;
+	/* Init the socket to receive and send datagram and support UDP protocol */
+	if(initialize_UDP(&sock, &locAddr, &targetAddr, local_port, target_ip)==-1){
+		return -1;
 	}
-	
-	/* Initialization listenning done */
-	printf("INIT listenning : UDPin : 0.0.0.0:%d\n", ntohs(locAddr.sin_port));
-	
-	
-	/* Attempt to make it non blocking */
-	#if (defined __QNX__) | (defined __QNXNTO__)
-	if (fcntl(sock, F_SETFL, O_NONBLOCK | FASYNC) < 0)
-	#else
-	if (fcntl(sock, F_SETFL, O_NONBLOCK | O_ASYNC) < 0)
-	#endif
-	{
-		fprintf(stderr, "error setting nonblocking: %s\n", strerror(errno));
-		close(sock);
-    	return -1;
-	}
-
-
-  	/* While we don't find a packet which can indicate sending port we read all messages received on our port */
-	while (recvfrom(sock, buf, sizeof(buf), 0, (struct sockaddr*)(&possibleTarget), &possibleTargetLen)<=0 || possibleTarget.sin_addr.s_addr != inet_addr(target_ip)) 
-	{
-		
-		memset(buf,0,256);
-		time(&currentTime);
-		timeLeft = difftime(currentTime, startTime);
-		if (timeLeft > timeout)
-		{
-			perror("Connection time out");
-			close(sock);
-			return -1;	
-		}
-	}
-
-	/* Init the socket to send datagram and support UDP protocol */
-	targetAddr.sin_family = AF_INET;
-	targetAddr.sin_addr.s_addr = inet_addr(target_ip);
-	targetAddr.sin_port = possibleTarget.sin_port;
-	memset (&targetAddr.sin_zero, 0, sizeof(targetAddr.sin_zero));
-
-	/* Initialization sending done */
-	printf("INIT target : UDPout : %s:%d\n",target_ip,ntohs(targetAddr.sin_port));
 	
 	
 	/* We need informations about GPS on the next step 
@@ -181,158 +483,23 @@ int main(void)
 	}
 	
 	
+	sendMissionCount(&sock, &targetAddr);
+	
+	sendWaypoint1(&sock, &targetAddr, gps_raw_int);
+	
+	sendTakeoff(&sock, &targetAddr);
+	
+	sendWaypoint2(&sock, &targetAddr);
+	
+	changeSpeed(&sock, &targetAddr);
+	
+	sendSetmode(&sock, &targetAddr);
+	
+	armMotors(&sock, &targetAddr);
+	
+	startMission(&sock, &targetAddr);
+	
 
-	/* Packing the type of message you want in msg variable */
-	mavlink_msg_mission_count_pack(255, 0, &msg, 1, 190, 4);	//MISSION COUNT
-	
-	/* Put it in the buffer */
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	/* Send it */
-	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
-	if (bytes_sent==-1) 
-	{
-		perror("Error\n"); // If there is an error
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		printf("Mission count sent\n");		//If it's done
-	}
-	memset(buf, 0, BUFFER_LENGTH);
-	
-	
-	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 0, MAV_FRAME_GLOBAL, MAV_CMD_NAV_WAYPOINT, 1, 1, 0, 0, 0, 0, gps_raw_int.lat, gps_raw_int.lon, gps_raw_int.alt);	//MISSION ITEM WAYPOINT to the current position
-	
-	/* Put it in the buffer */
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	/* Send it */
-	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
-	if (bytes_sent==-1) 
-	{
-		perror("Error mission item waypoint\n"); // If there is an error
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		printf("Mission item waypoint sent\n");		//If it's done
-	}
-	memset(buf, 0, BUFFER_LENGTH);
-	
-	
-	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 1, MAV_FRAME_GLOBAL_RELATIVE_ALT, MAV_CMD_NAV_TAKEOFF, 0, 1, 15, 0, 0, 0, 0, 0, 3);	//MISSION ITEM TAKEOFF 3m
-	
-	/* Put it in the buffer */
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	/* Send it */
-	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
-	if (bytes_sent==-1) 
-	{
-		perror("Error mission item takeoff\n"); // If there is an error
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		printf("Mission item takeoff sent\n");		//If it's done
-	}
-	memset(buf, 0, BUFFER_LENGTH);
-	
-	
-	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 2, MAV_FRAME_GLOBAL_RELATIVE_ALT, MAV_CMD_NAV_WAYPOINT, 0, 1, 0, 0, 0, 0, 50, 2, 3);	//MISSION ITEM WAYPOINT to latitude : 50, longitude : 2, altitude : 3, yaw angle :  in relative way
-	
-	/* Put it in the buffer */
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	/* Send it */
-	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
-	if (bytes_sent==-1) 
-	{
-		perror("Error mission item waypoint\n"); // If there is an error
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		printf("Mission item waypoint sent\n");		//If it's done
-	}
-	memset(buf, 0, BUFFER_LENGTH);
-	
-	
-	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_mission_item_pack(255, 0, &msg, 1, 190, 3, MAV_FRAME_MISSION, MAV_CMD_DO_CHANGE_SPEED, 0, 1, 3, 0.5, -1, 0, 0, 0, 0);	//MISSION ITEM MAV_CMD_DO_CHANGE_SPEED of type Ground Speed, at 3m/s and no change 
-	
-	/* Put it in the buffer */
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	/* Send it */
-	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
-	if (bytes_sent==-1) 
-	{
-		perror("Error mission item waypoint\n"); // If there is an error
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		printf("Mission item waypoint sent\n");		//If it's done
-	}
-	memset(buf, 0, BUFFER_LENGTH);
-	
-	
-	
-	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_set_mode_pack(255, 0, &msg, 1, MAV_MODE_GUIDED_DISARMED+MAV_MODE_FLAG_CUSTOM_MODE_ENABLED, COPTER_MODE_GUIDED); // Request change flight mode
-	/* Put it in the buffer */
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	/* Send it */
-	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
-	if (bytes_sent==-1) 
-	{
-		perror("Error changing mode\n"); // If there is an error
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		printf("Changing mode sent\n");		//If it's done
-	}
-	memset(buf, 0, BUFFER_LENGTH);
-	
-	
-	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_command_long_pack(255, 0, &msg, 1, 1, MAV_CMD_COMPONENT_ARM_DISARM, 0, 1, 0, 0, 0, 0, 0, 0);	//Request arm motors
-	/* Put it in the buffer */
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	/* Send it */
-	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
-	if (bytes_sent==-1) 
-	{
-		perror("Error arming motors\n"); // If there is an error
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		printf("Arming motors\n");		//If it's done
-	}
-	memset(buf, 0, BUFFER_LENGTH);
-	
-	
-	/* Packing the type of message you want in msg variable*/
-	mavlink_msg_command_long_pack(255, 0, &msg, 1, 1, MAV_CMD_MISSION_START, 0, 0, 0, 0, 0, 0, 0, 0);	//Request start mission
-	/* Put it in the buffer */
-	len = mavlink_msg_to_send_buffer(buf, &msg);
-	/* Send it */
-	bytes_sent = sendto(sock, buf, len, 0, (struct sockaddr*)&targetAddr, sizeof(struct sockaddr_in));
-	if (bytes_sent==-1) 
-	{
-		perror("Error starting mission\n"); // If there is an error
-		exit(EXIT_FAILURE);
-	}
-	else
-	{
-		printf("Mission start\n");		//If it's done
-	}
-	memset(buf, 0, BUFFER_LENGTH);
-
-	
-	
 	/* End */
 	close(sock);	
 	return 0;

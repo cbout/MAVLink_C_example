@@ -3,17 +3,17 @@
  promethe@ensea.fr
 
 
- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! THIS PROGRAM IS NOT TESTED AND NOT PERFECT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! THIS PROGRAM IS NOT TESTED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  Short program to Display video stream from the solo 3DR drone with GStreamer library, initialize the TCP request data stream before and register video in a file and frames in a memory buffer during the execution.
  This program is an extension of the program mavlink_video_stream_gstreamer_v3_test.c
- Firstly this program do exactly the same than the previous one, the following to register each frames of the stream in a memory buffer is a tille bit different.
+ Firstly this program do exactly the same than the previous one, the following to register each frames of the stream in a memory buffer is a little bit different.
  Indeed, we add to the string to parse, the "appsink" and his parameters.
  Then we have to get the sink before playing the pipeline.
  After that we do the following instructions infinitely :
  1. Get the sample and the buffer
  -. Get the capture, the structure, and so the width and the height (one time)
  2. Get the map and the image matrix 
- 3. Get OpenCv matrix and image and display it (optional)
+ 3. Transform the image matrix in a pgm image (optional)
 
  This software is governed by the CeCILL v2.1 license under French law and abiding by the rules of distribution of free software.
  You can use, modify and/ or redistribute the software under the terms of the CeCILL v2.1 license as circulated by CEA, CNRS and INRIA at the following URL "http://www.cecill.info".
@@ -31,7 +31,7 @@
  
  Compilation : 
  cd /mavlink_video_stream
- gcc mavlink_video_stream_gstreamer_v4_2.c -o mavlink_video_stream_gstreamer_v4_2 -I/usr/local/include/gstreamer-1.0/ `pkg-config --cflags --libs gstreamer-1.0` -I/usr/local/include -L/usr/local/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_highgui -lopencv_imgcodecs -lopencv_ml -lopencv_objdetect -lopencv_photo -lopencv_shape -lopencv_stitching -lopencv_superres -lopencv_video -lopencv_videoio -lopencv_videostab `pkg-config --cflags --libs gstreamer-app-1.0 `
+ gcc mavlink_video_stream_gstreamer_v4_2.c -o mavlink_video_stream_gstreamer_v4_2 -I/usr/local/include/gstreamer-1.0/ `pkg-config --cflags --libs gstreamer-1.0` `pkg-config --cflags --libs gstreamer-app-1.0 `
  
  Execution : 
  ./mavlink_video_stream_gstreamer_v4_2
@@ -55,10 +55,24 @@ or in the same folder as this source file */
 #include <gst/app/gstappsink.h>
 #include <gst/app/gstappsrc.h>
 
-/* This assumes you have the opencv headers on your include path
-or in the same folder as this source file */
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+
+/**
+ * @brief    	Initialize a TCP connection in order to request video stream
+ *
+ * @param	s			The socket
+ * @param	serv_addr	Struct of the socket
+ *
+ */
+void initializeTCPConnection(int *s, struct sockaddr_in *serv_addr){
+	*s = socket(PF_INET, SOCK_STREAM, 0);
+
+	serv_addr->sin_family = AF_INET;
+	serv_addr->sin_addr.s_addr = inet_addr ("10.1.1.1");	// Address of the server
+	serv_addr->sin_port = htons (5502);	// Port of the server
+	memset (serv_addr->sin_zero, 0, sizeof(serv_addr->sin_zero));
+	
+	connect (*s, (struct sockaddr *)serv_addr, sizeof *serv_addr);
+}
 
 
 /**
@@ -78,29 +92,19 @@ int main(int argc, char *argv[])
 	GstStructure *structure;
 	GstMapInfo map;
 	unsigned char *gst_image;
-	CvMat mat;
-	IplImage* img;
 	
 	int width;		//Width of the video
 	int height;		//Height of the video
 
-	int s;
+	FILE * fp;
+	int s, i;
 	struct sockaddr_in serv_addr;
 	
 	
-
 	/* Initialize a TCP connection in order to request video stream */
-	s = socket(PF_INET, SOCK_STREAM, 0);
+	initializeTCPConnection(&s, &serv_addr);
 
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = inet_addr ("10.1.1.1");	// Address of the server
-	serv_addr.sin_port = htons (5502);	// Port of the server
-	memset (&serv_addr.sin_zero, 0, sizeof(serv_addr.sin_zero));
-	
-	connect (s, (struct sockaddr *)&serv_addr, sizeof serv_addr);
 
-	
-	
 	/* Initialize GStreamer */
     gst_init(&argc, &argv);
 
@@ -131,24 +135,11 @@ int main(int argc, char *argv[])
     height = g_value_get_int(gst_structure_get_value(structure, "height"));
 	//printf("%d, %d\n", width, height);	//Width and height of the video
 	
-    /* Get map and image matrix */
+    /* Get map and initialize image matrix */
 	gst_buffer_map(buffer, &map, GST_MAP_READ);
 	gst_image = malloc(map.size * sizeof(unsigned char));
-	memcpy(gst_image, (char*)map.data, map.size);
+	//printf("%lu \n",map.size);				// Size of the video
 	
-	
-	/**** INTERPRETATION OF gst_image ******/
-	
-	/* With opencv (Doesn't work perfectly) */
-   	/* create a window */
-    cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE);
-    cvMoveWindow("mainWin", 100, 100);
-	
-	/* Get OpenCv matrix and image and display it */
-	mat = cvMat(height, width, CV_8UC4, gst_image);
-	img = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 4);
-	cvGetImage(&mat, img);
-	cvShowImage("mainWin", img);
 	
 	/* Main loop */
     while(1) {
@@ -163,11 +154,17 @@ int main(int argc, char *argv[])
 		gst_buffer_map(buffer, &map, GST_MAP_READ);
 		memcpy(gst_image, (char*)map.data, map.size);
 		
-		/* Get OpenCv matrix and image and display it */
-		mat = cvMat(height, width, CV_8UC4, gst_image);
-		img = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 4);
-		cvGetImage(&mat, img);
-		cvShowImage("mainWin", img);
+		
+		/* INTERPRETATION OF gst_image with file */
+		fp = fopen ("capture.pgm", "w+");
+		fprintf(fp, "P2\n%d %d\n255\n", width, height);
+		
+		/* For each pixel of the image */
+		for(i=0; i<width*height; i++)
+		{
+			fprintf(fp, "%d \n", gst_image[2*i+1]);	
+		} 
+		fclose(fp);
 	}
 	
 	

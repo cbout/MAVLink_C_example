@@ -57,6 +57,50 @@ or in the same folder as this source file */
 
 
 /**
+ * @brief      	Init the socket to receive datagram and support UDP protocol
+ *
+ * @param		sock	the socket
+ * @param		locAddr		the structure of the local socket
+ * @param		local_port	the listening port
+ *			   
+ * @return     -1 if there is a problem, 0 else
+ */
+int initialize_UDP(int *sock, struct sockaddr_in *locAddr, int local_port){
+	
+	*sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+	locAddr->sin_family = AF_INET;
+	locAddr->sin_addr.s_addr = INADDR_ANY;
+	locAddr->sin_port = htons(local_port);
+	memset (locAddr->sin_zero, 0, sizeof(locAddr->sin_zero));
+	
+	if (-1 == bind(*sock,(struct sockaddr *)locAddr, sizeof(struct sockaddr)))
+	{
+		perror("error bind failed");
+		close(*sock);
+    	return -1;
+	}
+	
+	/* Initialization listenning done */
+	printf("INIT listenning :\nUDPin: 0.0.0.0:%d\n", ntohs(locAddr->sin_port));
+	
+	/* Attempt to make it non blocking */
+	#if (defined __QNX__) | (defined __QNXNTO__)
+	if (fcntl(*sock, F_SETFL, O_NONBLOCK | FASYNC) < 0)
+	#else
+	if (fcntl(*sock, F_SETFL, O_NONBLOCK | O_ASYNC) < 0)
+	#endif
+	{
+		fprintf(stderr, "error setting nonblocking: %s\n", strerror(errno));
+		close(*sock);
+    	return -1;
+	}
+	
+	return 0;
+}
+
+
+/**
  * @brief      Main
  *			   
  * @return     0
@@ -82,34 +126,8 @@ int main(void)
 	
 	
 	/* Init the socket to receive datagram and support UDP protocol */
-	sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-
-	locAddr.sin_family = AF_INET;
-	locAddr.sin_addr.s_addr = INADDR_ANY;
-	locAddr.sin_port = htons(local_port);
-	memset (&locAddr.sin_zero, 0, sizeof(locAddr.sin_zero));
-	
-	if (-1 == bind(sock,(struct sockaddr *)&locAddr, sizeof(struct sockaddr)))
-	{
-		perror("error bind failed");
-		close(sock);
-    	return -1;
-	}
-	
-	/* Initialization listenning done */
-	printf("INIT listenning :\nUDPin: 0.0.0.0:%d\n", ntohs(locAddr.sin_port));
-	
-	
-	/* Attempt to make it non blocking */
-	#if (defined __QNX__) | (defined __QNXNTO__)
-	if (fcntl(sock, F_SETFL, O_NONBLOCK | FASYNC) < 0)
-	#else
-	if (fcntl(sock, F_SETFL, O_NONBLOCK | O_ASYNC) < 0)
-	#endif
-	{
-		fprintf(stderr, "error setting nonblocking: %s\n", strerror(errno));
-		close(sock);
-    	return -1;
+	if(initialize_UDP(&sock, &locAddr, local_port)==-1){
+		return -1;
 	}
 
 
